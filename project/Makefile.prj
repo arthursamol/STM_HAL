@@ -141,10 +141,10 @@ ${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/TaskInterruptable.o
 # App Layer
 #${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/BatteryObserver.o
 ${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/MotorController.o
-${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/Mpu.o 
-${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/BalanceController.o
-${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/SteeringController.o
-${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/SlaveController.o
+#${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/Mpu.o 
+#${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/BalanceController.o
+#${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/SteeringController.o
+#${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/SlaveController.o
 
 # eMPL Driver
 ${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/inv_mpu_dmp_motion_driver.o
@@ -168,7 +168,7 @@ ${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/log_stm32.o ## Remove from build only for l
 #${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/TestSleep.o
 #${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/TestGpio.o
 #${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/TestIR.o
-#${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/TestDRV8302.o
+${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/TestDRV8302.o
 #${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/Test_BALANCE.o
 #${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/TestMsCom.o
 

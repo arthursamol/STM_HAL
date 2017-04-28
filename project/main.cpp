@@ -106,93 +106,93 @@ int main(void)
 
     const bool isMaster = hal::Factory<hal::Gpio>::get<hal::Gpio::CONFIG>();
 
-    g_Mpu = new app::Mpu();
+//    g_Mpu = new app::Mpu();
 
     auto battery = new dev::Battery();
-    auto vBattery = new virt::Battery();
+//    auto vBattery = new virt::Battery();
 
     g_motorCtrl = new app::MotorController(
                                            dev::Factory<dev::SensorBLDC>::get<dev::SensorBLDC::BLDC>(),
                                            *battery, 200000, 80000);
 
-    auto vMotor = new virt::MotorController();
-
-    auto balancer = new app::BalanceController(*g_Mpu, *g_motorCtrl);
-    auto vBalancer = new virt::BalanceController();
-
-    auto virtHeadLight = new virt::Light(interface::Light::HEADLIGHT);
-
-    g_light1 = virtHeadLight;
-
-    auto virtInternalTemp = new virt::TemperatureSensor(interface::TemperatureSensor::INTERNAL);
-    auto virtMotorTemp = new virt::TemperatureSensor(interface::TemperatureSensor::MOTOR);
-    auto virtBatteryTemp = new virt::TemperatureSensor(interface::TemperatureSensor::BATTERY);
-    auto virtFetTemp = new virt::TemperatureSensor(interface::TemperatureSensor::FET);
-
-    static auto masterToSlaveDTO = com::make_dto(*virtHeadLight, *virtHeadLight, *vBalancer);
-
-    static auto slaveToMasterDTO = com::make_dto(*virtMotorTemp,
-                                          *virtBatteryTemp,
-                                          *virtFetTemp,
-                                          *vBattery,
-                                          *vMotor);
-
-
-	// TODO make different build targets to reduce flash size
-    if (!isMaster) {
-    	[[gnu::used]] auto comApp =
-            new app::Communication<decltype(masterToSlaveDTO), decltype(slaveToMasterDTO)>(
-                                                                                           hal::Factory<hal::
-                                                                                                        UsartWithDma>::
-                                                                                           get<hal::Usart::MSCOM_IF>(),
-                                                                                           masterToSlaveDTO,
-                                                                                           slaveToMasterDTO);
-    } else {
-    	[[gnu::used]] auto comApp =
-            new app::Communication<decltype(slaveToMasterDTO), decltype(masterToSlaveDTO)>(
-                                                                                           hal::Factory<hal::
-                                                                                                        UsartWithDma>::
-                                                                                           get<hal::Usart::MSCOM_IF>(),
-                                                                                           slaveToMasterDTO,
-                                                                                           masterToSlaveDTO);
-    }
-
-    if (!isMaster) {
-        //===================== APPS in Slave ==========================
-    	[[gnu::unused]] auto slaveController = new app::SlaveController(
-                                                        *balancer,
-                                                        *vBalancer,
-                                                        *g_motorCtrl,
-                                                        *vMotor,
-                                                        *battery,
-                                                        *vBattery,
-                                                        dev::Factory<dev::TemperatureSensor>::get<interface::
-                                                                                                  TemperatureSensor::
-                                                                                                  INTERNAL>(),
-                                                        dev::Factory<dev::TemperatureSensor>::get<interface::
-                                                                                                  TemperatureSensor::
-                                                                                                  MOTOR>(),
-                                                        dev::Factory<dev::TemperatureSensor>::get<interface::
-                                                                                                  TemperatureSensor::
-                                                                                                  FET>(),
-                                                        dev::Factory<dev::TemperatureSensor>::get<interface::
-                                                                                                  TemperatureSensor::
-                                                                                                  BATTERY>(),
-                                                        *virtInternalTemp,
-                                                        *virtMotorTemp,
-                                                        *virtFetTemp,
-                                                        *virtBatteryTemp,
-                                                        dev::Factory<dev::Light>::get<interface::Light::HEADLIGHT>(),
-                                                        dev::Factory<dev::Light>::get<interface::Light::HEADLIGHT>(),
-                                                        *virtHeadLight,
-                                                        *virtHeadLight);
-    }
-    else {
-        //===================== APPS in Master ==========================
-        constexpr const auto& straingaugeSensor =
-            dev::Factory<dev::StraingaugeSensor>::get<dev::StraingaugeSensor::STRAINGAUGESENSOR>();
-        [[gnu::unused]] auto steering = new app::SteeringController(*balancer, *vBalancer, straingaugeSensor);
-    }
+//    auto vMotor = new virt::MotorController();
+//
+//    auto balancer = new app::BalanceController(*g_Mpu, *g_motorCtrl);
+//    auto vBalancer = new virt::BalanceController();
+//
+//    auto virtHeadLight = new virt::Light(interface::Light::HEADLIGHT);
+//
+//    g_light1 = virtHeadLight;
+//
+//    auto virtInternalTemp = new virt::TemperatureSensor(interface::TemperatureSensor::INTERNAL);
+//    auto virtMotorTemp = new virt::TemperatureSensor(interface::TemperatureSensor::MOTOR);
+//    auto virtBatteryTemp = new virt::TemperatureSensor(interface::TemperatureSensor::BATTERY);
+//    auto virtFetTemp = new virt::TemperatureSensor(interface::TemperatureSensor::FET);
+//
+//    static auto masterToSlaveDTO = com::make_dto(*virtHeadLight, *virtHeadLight, *vBalancer);
+//
+//    static auto slaveToMasterDTO = com::make_dto(*virtMotorTemp,
+//                                          *virtBatteryTemp,
+//                                          *virtFetTemp,
+//                                          *vBattery,
+//                                          *vMotor);
+//
+//
+//	// TODO make different build targets to reduce flash size
+//    if (!isMaster) {
+//    	[[gnu::used]] auto comApp =
+//            new app::Communication<decltype(masterToSlaveDTO), decltype(slaveToMasterDTO)>(
+//                                                                                           hal::Factory<hal::
+//                                                                                                        UsartWithDma>::
+//                                                                                           get<hal::Usart::MSCOM_IF>(),
+//                                                                                           masterToSlaveDTO,
+//                                                                                           slaveToMasterDTO);
+//    } else {
+//    	[[gnu::used]] auto comApp =
+//            new app::Communication<decltype(slaveToMasterDTO), decltype(masterToSlaveDTO)>(
+//                                                                                           hal::Factory<hal::
+//                                                                                                        UsartWithDma>::
+//                                                                                           get<hal::Usart::MSCOM_IF>(),
+//                                                                                           slaveToMasterDTO,
+//                                                                                           masterToSlaveDTO);
+//    }
+//
+//    if (!isMaster) {
+//        //===================== APPS in Slave ==========================
+//    	[[gnu::unused]] auto slaveController = new app::SlaveController(
+//                                                        *balancer,
+//                                                        *vBalancer,
+//                                                        *g_motorCtrl,
+//                                                        *vMotor,
+//                                                        *battery,
+//                                                        *vBattery,
+//                                                        dev::Factory<dev::TemperatureSensor>::get<interface::
+//                                                                                                  TemperatureSensor::
+//                                                                                                  INTERNAL>(),
+//                                                        dev::Factory<dev::TemperatureSensor>::get<interface::
+//                                                                                                  TemperatureSensor::
+//                                                                                                  MOTOR>(),
+//                                                        dev::Factory<dev::TemperatureSensor>::get<interface::
+//                                                                                                  TemperatureSensor::
+//                                                                                                  FET>(),
+//                                                        dev::Factory<dev::TemperatureSensor>::get<interface::
+//                                                                                                  TemperatureSensor::
+//                                                                                                  BATTERY>(),
+//                                                        *virtInternalTemp,
+//                                                        *virtMotorTemp,
+//                                                        *virtFetTemp,
+//                                                        *virtBatteryTemp,
+//                                                        dev::Factory<dev::Light>::get<interface::Light::HEADLIGHT>(),
+//                                                        dev::Factory<dev::Light>::get<interface::Light::HEADLIGHT>(),
+//                                                        *virtHeadLight,
+//                                                        *virtHeadLight);
+//    }
+//    else {
+//        //===================== APPS in Master ==========================
+//        constexpr const auto& straingaugeSensor =
+//            dev::Factory<dev::StraingaugeSensor>::get<dev::StraingaugeSensor::STRAINGAUGESENSOR>();
+//        [[gnu::unused]] auto steering = new app::SteeringController(*balancer, *vBalancer, straingaugeSensor);
+//    }
 
     os::Task::startScheduler();
 

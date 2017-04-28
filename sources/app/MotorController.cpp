@@ -80,13 +80,14 @@ void MotorController::motorControllerTaskFunction(const bool& join)
             mSetTorque = newSetTorque;
         }
 
-        mCurrentTorque = mMotor.getActualTorqueInNewtonMeter();
-        adjustControllerLimits();
-        mController.compute();
+//        mCurrentTorque = mMotor.getActualTorqueInNewtonMeter();
+//        adjustControllerLimits();
+//        mController.compute();
+        mOutputTorque = mSetTorque * 1000.0;
         updatePwmOutput();
         updateQuadrant();
 
-#if 0
+#if 1
         TraceLight(
                    "tick: %5d\t"
                    "Soll: %5d\t"
