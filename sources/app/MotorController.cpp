@@ -32,9 +32,9 @@ MotorController::MotorController(const dev::SensorBLDC& motor,
                          MotorController::STACKSIZE,
                          os::Task::Priority::HIGH,
                          [this](const bool& join)
-                         {
-                             motorControllerTaskFunction(join);
-                         }),
+{
+    motorControllerTaskFunction(join);
+}),
     mMotor(motor),
     mBattery(battery),
     mController(mCurrentTorque,
@@ -87,7 +87,7 @@ void MotorController::motorControllerTaskFunction(const bool& join)
         updatePwmOutput();
         updateQuadrant();
 
-#if 1
+#if 0
         TraceLight(
                    "tick: %5d\t"
                    "Soll: %5d\t"
@@ -163,7 +163,8 @@ void MotorController::updatePwmOutput(void)
        dPWM = R * dM / U
      */
 
-    mMotor.setPulsWidthInMill(static_cast<int32_t>(mMotor.mMotorCoilResistance * mOutputTorque / mBattery.getVoltage()));
+    mMotor.setPulsWidthInMill(static_cast<int32_t>(mMotor.mMotorCoilResistance * mOutputTorque /
+                                                   mBattery.getVoltage()));
 }
 
 void MotorController::setTorque(const float setValue)
