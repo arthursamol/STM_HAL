@@ -1,9 +1,9 @@
 ifeq ($(MAKECMDGOALS),debug_firmware)
 DEFINES+=-DDEBUG
 DEFINES+=-g
-DEFINES+=-O3
+DEFINES+=-O0
 DEFINES+=-DSYSVIEW
-LDFLAGS+=-O3
+LDFLAGS+=-O0
 endif
 
 ifeq ($(MAKECMDGOALS),firmware)

@@ -33,13 +33,13 @@ os::TaskEndless drv8302Test("drv8302_Test", 2048, os::Task::Priority::MEDIUM, []
                                 poti.getValue();
                                 os::ThisTask::sleep(std::chrono::milliseconds(5));
 
-                                auto torque = 0.0;
+                                float torque = 0.0;
 
                                 while (true) {
-                                    auto newtorque = poti.getVoltage() - 1.0;
+                                    float newtorque = poti.getVoltage() - 1.0f;
 
-                                    newtorque = std::min(1.0, newtorque);
-                                    newtorque = std::max(-1.0, newtorque);
+                                    newtorque = std::min(1.0f, newtorque);
+                                    newtorque = std::max(-1.0f, newtorque);
 
                                     torque -= torque / 20;
                                     torque += newtorque / 20;
