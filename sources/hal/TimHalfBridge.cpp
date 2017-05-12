@@ -64,6 +64,10 @@ void HalfBridge::setBridgeC(const bool highSide, const bool lowSide) const
 
 void HalfBridge::setBridge(const std::array<const bool, 6>& states) const
 {
+    for (int i = 0; i < 6; ++i) {
+        currentTransistorStates[i] = states[i];
+    }
+
     setBridgeA(states[0], states[1]);
     setBridgeB(states[2], states[3]);
     setBridgeC(states[4], states[5]);
@@ -183,6 +187,11 @@ void HalfBridge::initialize(void) const
     TIM_SelectCOM(mTim.getBasePointer(), ENABLE);
 
     mTim.enable();
+}
+
+std::array<bool, 6>* HalfBridge::getCurrentTransisotrStates()
+{
+    return &currentTransistorStates;
 }
 
 constexpr const std::array<const HalfBridge, HalfBridge::Description::__ENUM__SIZE> Factory<HalfBridge>::Container;

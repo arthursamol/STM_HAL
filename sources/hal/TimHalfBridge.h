@@ -34,9 +34,9 @@ struct HalfBridge {
 
     HalfBridge() = delete;
     HalfBridge(const HalfBridge&) = delete;
-    HalfBridge(HalfBridge &&) = default;
+    HalfBridge(HalfBridge&&) = default;
     HalfBridge& operator=(const HalfBridge&) = delete;
-    HalfBridge& operator=(HalfBridge &&) = delete;
+    HalfBridge& operator=(HalfBridge&&) = delete;
 
     void setPulsWidthPerMill(uint32_t) const;
     uint32_t getPulsWidthPerMill(void) const;
@@ -60,6 +60,8 @@ struct HalfBridge {
     const enum Description mDescription;
     const Tim& mTim;
 
+    std::array<bool, 6>* getCurrentTransisotrStates();
+
 private:
     constexpr HalfBridge(const enum Description&    desc,
                          const Tim&                 timer,
@@ -67,10 +69,12 @@ private:
                          const TIM_OCInitTypeDef&   ocConf,
                          const TIM_BDTRInitTypeDef& bdtrConf) :
         mDescription(desc), mTim(timer),
+        currentTransistorStates({0, 0, 0, 0, 0, 0}),
         mInputTrigger(inputTrigger),
         mOcConfiguration(ocConf),
         mBdtrConfiguration(bdtrConf) {}
 
+    mutable std::array<bool, 6> currentTransistorStates;     // A AN  B BN  C CN
     const uint16_t mInputTrigger;
     const TIM_OCInitTypeDef mOcConfiguration;
     const TIM_BDTRInitTypeDef mBdtrConfiguration;
