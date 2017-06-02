@@ -40,5 +40,7 @@ static constexpr std::array<const PhaseCurrentSensor, PhaseCurrentSensor::__ENUM
                                              TIM_OCNIdleState_Reset})
   } };
 
+  //TODO: here create new PhaseCurrentSensor
+
 #endif /* SOURCES_PMD_PHASECURRENTSENSOR_CONFIG_DESCRIPTION_H_ */
 #endif /* SOURCES_PMD_PHASECURRENTSENSOR_CONFIG_DESCRIPTION_H_ */
