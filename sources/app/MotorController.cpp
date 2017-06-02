@@ -163,13 +163,9 @@ void MotorController::updatePwmOutput(void)
        dPWM = R * dM / U
      */
 
-<<<<<<< HEAD
+
     //mMotor.setPulsWidthInMill(static_cast<int32_t>(mMotor.mMotorCoilResistance * mOutputTorque / mBattery.getVoltage()));
 	mMotor.setPulsWidthInMill(static_cast<int32_t>(mOutputTorque));
-=======
-    mMotor.setPulsWidthInMill(static_cast<int32_t>(mMotor.mMotorCoilResistance * mOutputTorque /
-                                                   mBattery.getVoltage()));
->>>>>>> 1f28a60dfed75071bebfb83ee14f5b12949da93f
 }
 
 void MotorController::setTorque(const float setValue)

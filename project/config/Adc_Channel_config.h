@@ -26,8 +26,8 @@ enum Description {
     NTC_FET,
     IB_FB,
     I_TOTAL_FB,
-    I_LowA_FB,
-    I_LowB_FB,
+    I_LOWA_FB,
+    I_LOWB_FB,
     __ENUM__SIZE
 };
 
@@ -85,7 +85,7 @@ static constexpr const std::array<const Adc::Channel,
                    ADC_SampleTime_4Cycles5,
                    std::chrono::milliseconds(0),
                    3),
-/*
+
       //DID: add new elements here for phase current measurement
       Adc::Channel(Adc::Channel::I_LOWA_FB,  //uses by PhaseCurrentSensor I_LOWA_FB,
                   Factory<Adc>::get<Adc::Description::PMD_ADC2>(),
@@ -93,14 +93,13 @@ static constexpr const std::array<const Adc::Channel,
                   ADC_SampleTime_4Cycles5,
                   std::chrono::milliseconds(0),
                   3), //spannungsteiler regelt auf 3.125V
-      Adc::Channel(Adc::Channel::I_LOWB_FB,  //uses by PhaseCurrentSensor I_TOTAL_FB
+      Adc::Channel(Adc::Channel::I_LOWB_FB,  //uses by PhaseCurrentSensor I_LOWB_FB
                    Factory<Adc>::get<Adc::Description::PMD_ADC3>(),
                    ADC_Channel_2,
                    ADC_SampleTime_4Cycles5,
                    std::chrono::milliseconds(0),
                    3), //spannungsteiler regelt auf 3.125V
 
-*/
   } };
 
 #endif /* SOURCES_PMD_ADC_CHANNEL_CONFIG_CONTAINER_H_ */
