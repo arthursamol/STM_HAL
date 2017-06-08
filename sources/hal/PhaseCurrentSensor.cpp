@@ -49,6 +49,14 @@ void PhaseCurrentSensor::setPulsWidthForTriggerPerMill(uint32_t value) const
                     static_cast<uint32_t>(std::max(
                                                    static_cast<int32_t>(value + HalfBridge::DEFAULT_DEADTIME),
                                                    static_cast<int32_t>(1))));
+
+//    //Modify variable value for off part of duty cycle
+//    value = ((HalfBridge::MAXIMAL_PWM_IN_MILL - value) * 0.5) + value;
+//
+//    TIM_SetCompare5(mHBridge.mTim.getBasePointer(),
+//                        static_cast<uint32_t>(std::max(
+//                                                       static_cast<int32_t>((value + HalfBridge::DEFAULT_DEADTIME),
+//                                                       static_cast<int32_t>(1))));
 }
 
 void PhaseCurrentSensor::setNumberOfMeasurementsForPhaseCurrentValue(uint32_t value) const
