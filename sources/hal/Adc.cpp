@@ -39,6 +39,9 @@ extern "C" void ADC1_2_IRQHandler(void)
 
     if (ADC_GetITStatus(adc2.getBasePointer(), ADC_FLAG_EOC) == SET) {
         Adc::ConversionCompleteSemaphores[static_cast<size_t>(adc2.mDescription)].giveFromISR();
+        if(Adc::ConversionDoneCallbacks[static_cast<size_t>(adc2.mDescription)]) {
+        	Adc::ConversionDoneCallbacks[static_cast<size_t>(adc2.mDescription)]();
+        }
         ADC_ClearITPendingBit(adc2.getBasePointer(), ADC_FLAG_EOC);
     }
 }
@@ -49,6 +52,9 @@ extern "C" void ADC3_IRQHandler(void)
 
     if (ADC_GetITStatus(adc.getBasePointer(), ADC_FLAG_EOC) == SET) {
         Adc::ConversionCompleteSemaphores[static_cast<size_t>(adc.mDescription)].giveFromISR();
+        if(Adc::ConversionDoneCallbacks[static_cast<size_t>(adc.mDescription)]) {
+        	Adc::ConversionDoneCallbacks[static_cast<size_t>(adc.mDescription)]();
+        }
         ADC_ClearITPendingBit(adc.getBasePointer(), ADC_FLAG_EOC);
     }
 }
@@ -153,7 +159,19 @@ void Adc::stopConversion(void) const
     ADC_StopConversion(ADCx);
 }
 
+void Adc::registerInterruptCallback(std::function<void(uint16_t)> function) const
+{
+	ConversionDoneCallbacks[mDescription] = function;
+}
+
+void Adc::unregisterInterruptCallback(void) const
+{
+	ConversionDoneCallbacks[mDescription] = nullptr;
+}
+
 std::array<uint32_t, Adc::Description::__ENUM__SIZE> Adc::CalibrationValues;
 std::array<os::Semaphore, Adc::Description::__ENUM__SIZE> Adc::ConversionCompleteSemaphores;
 std::array<os::Mutex, Adc::Description::__ENUM__SIZE> Adc::ConverterAvailableMutex;
+Adc::ConversionDoneCallbackArray Adc::ConversionDoneCallbacks;
+
 constexpr std::array<const Adc, Adc::Description::__ENUM__SIZE> Factory<Adc>::Container;
