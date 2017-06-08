@@ -140,7 +140,8 @@ void PhaseCurrentSensor::initialize(void) const
 
     /* Channel 4 output compare signal is connected to TRGO */
     TIM_SelectOutputTrigger(mHBridge.mTim.getBasePointer(), (uint16_t)TIM_TRGOSource_OC4Ref);
-    TIM_SelectOutputTrigger2(mHBridge.mTim.getBasePointer(), (uint16_t)TIM_TRGOSource_OC4Ref);
+    //Channel 5 Output Compare signal is connected to TRGO2 which is connected to ADC23
+    TIM_SelectOutputTrigger2(mHBridge.mTim.getBasePointer(), (uint16_t)TIM_TRGO2Source_OC5Ref);
     setPulsWidthForTriggerPerMill(1);
 }
 
