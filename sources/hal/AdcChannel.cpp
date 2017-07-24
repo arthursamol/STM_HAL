@@ -36,6 +36,16 @@ uint32_t Adc::Channel::getValue(void) const
     return mCacheValue;
 }
 
+void Adc::Channel::registerInterruptCallback(std::function<void(uint16_t)> function) const
+{
+    mBaseAdc.registerInterruptCallback(function);
+}
+
+void Adc::Channel::unregisterInterruptCallback(void) const
+{
+    mBaseAdc.unregisterInterruptCallback();
+}
+
 void Adc::Channel::startConversion(void) const
 {
     mBaseAdc.startConversion(*this);

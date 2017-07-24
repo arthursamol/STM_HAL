@@ -71,6 +71,9 @@ private:
     void startConversion(void) const;
     void stopConversion(void) const;
 
+    void registerInterruptCallback(std::function<void(uint16_t)> function) const;
+    void unregisterInterruptCallback(void) const;
+
     friend struct Adc;
     friend struct AdcWithDma;
     friend class Factory<Adc::Channel>;

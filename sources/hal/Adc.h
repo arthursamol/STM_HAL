@@ -71,10 +71,16 @@ private:
     float getVoltage(const Adc::Channel&) const;
     void startConversion(const Adc::Channel&) const;
     void stopConversion(void) const;
+    void registerInterruptCallback(std:.function<void(uint16-t)> function) const;
+    void unregisterInterruptCallback(void) const;
 
     static std::array<uint32_t, Description::__ENUM__SIZE> CalibrationValues;
     static std::array<os::Semaphore, Description::__ENUM__SIZE> ConversionCompleteSemaphores;
     static std::array<os::Mutex, Description::__ENUM__SIZE> ConverterAvailableMutex;
+
+    using ConversionDoneCallbackArray = std::array<std::function<void(uint16_t)>, Description::__ENUM__SIZE>;
+
+    static ConversionDoneCallbackArray ConversionDoneCallbacks;
     static constexpr uint8_t TWO_CONVERSION_SAMPLE_DELAY = 0;
     static constexpr uint32_t INTERRUPT_PRIORITY = 0xa;
 
