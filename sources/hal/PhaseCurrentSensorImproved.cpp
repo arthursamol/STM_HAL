@@ -13,19 +13,19 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-#include "PhaseCurrentSensor.h"
+#include "PhaseCurrentSensorImproved.h"
 #include "trace.h"
 #include <algorithm>
 
 static const int __attribute__((unused)) g_DebugZones = ZONE_ERROR | ZONE_WARNING | ZONE_VERBOSE | ZONE_INFO;
 
-using hal::AdcWithDma;
+using hal::Adc;
 using hal::Factory;
 using hal::HalfBridge;
-using hal::PhaseCurrentSensor;
+using hal::PhaseCurrentSensorImproved;
 using hal::Tim;
 
-void PhaseCurrentSensor::setPulsWidthForTriggerPerMill(uint32_t value) const
+void PhaseCurrentSensorImproved::setPulsWidthForTriggerPerMill(uint32_t value) const
 {
     if (value > HalfBridge::MAXIMAL_PWM_IN_MILL) {
         value = HalfBridge::MAXIMAL_PWM_IN_MILL;
@@ -38,7 +38,7 @@ void PhaseCurrentSensor::setPulsWidthForTriggerPerMill(uint32_t value) const
     float scale = static_cast<float>(mHBridge.mTim.getPeriode()) /
                   static_cast<float>(HalfBridge::MAXIMAL_PWM_IN_MILL);
 
-    static const uint32_t sampleTime = 2 << mAdcWithDma.getAdcSampleTime();
+    static const uint32_t sampleTime = 2 ;//<< mAdc1.getAdcSampleTime();
 
     // TODO Magic Numbers refactoring
 
@@ -55,11 +55,11 @@ void PhaseCurrentSensor::setPulsWidthForTriggerPerMill(uint32_t value) const
 
     TIM_SetCompare5(mHBridge.mTim.getBasePointer(),
                         static_cast<uint32_t>(std::max(
-                                                        static_cast<int32_t>((value + HalfBridge::DEFAULT_DEADTIME),
+                                                        static_cast<int32_t>(value + HalfBridge::DEFAULT_DEADTIME),
                                                         static_cast<int32_t>(1))));
 }
 
-void PhaseCurrentSensor::setNumberOfMeasurementsForPhaseCurrentValue(uint32_t value) const
+void PhaseCurrentSensorImproved::setNumberOfMeasurementsForPhaseCurrentValue(uint32_t value) const
 {
     if (value > MAX_NUMBER_OF_MEASUREMENTS) {
         value = MAX_NUMBER_OF_MEASUREMENTS;
@@ -68,19 +68,19 @@ void PhaseCurrentSensor::setNumberOfMeasurementsForPhaseCurrentValue(uint32_t va
         value = 1;
     }
     mNumberOfMeasurementsForPhaseCurrentValue = value;
-    mAdcWithDma.stopConversion();
-    mAdcWithDma.startConversion(
-                                MeasurementValueBuffer[mDescription].data(), mNumberOfMeasurementsForPhaseCurrentValue,
-                                [&] {this->updateCurrentValue();
-                                });
+    //mAdc1.stopConversion();
+    //mAdc1.startConversion(
+//                                MeasurementValueBuffer[mDescription].data(), mNumberOfMeasurementsForPhaseCurrentValue,
+//                                [&] {this->updateCurrentValue();
+//                                });
 }
 
-size_t PhaseCurrentSensor::getNumberOfMeasurementsForPhaseCurrentValue(void) const
+size_t PhaseCurrentSensorImproved::getNumberOfMeasurementsForPhaseCurrentValue(void) const
 {
     return mNumberOfMeasurementsForPhaseCurrentValue;
 }
 
-void PhaseCurrentSensor::updateCurrentValue(void) const
+void PhaseCurrentSensorImproved::updateCurrentValue(void) const
 {
     auto& array = MeasurementValueBuffer[mDescription];
 
@@ -94,39 +94,39 @@ void PhaseCurrentSensor::updateCurrentValue(void) const
     }
 }
 
-void PhaseCurrentSensor::registerValueAvailableSemaphore(os::Semaphore* valueAvailable) const
+void PhaseCurrentSensorImproved::registerValueAvailableSemaphore(os::Semaphore* valueAvailable) const
 {
     mValueAvailableSemaphore = valueAvailable;
 }
 
-void PhaseCurrentSensor::unregisterValueAvailableSemaphore(void) const
+void PhaseCurrentSensorImproved::unregisterValueAvailableSemaphore(void) const
 {
     mValueAvailableSemaphore = nullptr;
 }
 
-void PhaseCurrentSensor::enable(void) const
+void PhaseCurrentSensorImproved::enable(void) const
 {
-    mAdcWithDma.startConversion(MeasurementValueBuffer[mDescription], [&] {this->updateCurrentValue();
-                                });
+    //mAdc1.startConversion(MeasurementValueBuffer[mDescription], [&] {this->updateCurrentValue();
+    //                            });
 }
 
-void PhaseCurrentSensor::disable(void) const
+void PhaseCurrentSensorImproved::disable(void) const
 {
-    mAdcWithDma.stopConversion();
+    //mAdc1.stopConversion();
 }
 
-void PhaseCurrentSensor::reset(void) const
+void PhaseCurrentSensorImproved::reset(void) const
 {
     mPhaseCurrentValue = 2 * mOffsetValue - mPhaseCurrentValue;
 }
 
-void PhaseCurrentSensor::calibrate(void) const
+void PhaseCurrentSensorImproved::calibrate(void) const
 {
     os::ThisTask::sleep(std::chrono::milliseconds(250));
     mOffsetValue = mPhaseCurrentValue;
 }
 
-float PhaseCurrentSensor::getPhaseCurrent(void) const
+float PhaseCurrentSensorImproved::getPhaseCurrent(void) const
 {
     static constexpr const float A_PER_DIGITS = 1.0 / 53.8;
 
@@ -134,12 +134,17 @@ float PhaseCurrentSensor::getPhaseCurrent(void) const
            A_PER_DIGITS;
 }
 
-float PhaseCurrentSensor::getCurrentVoltage(void) const
+float PhaseCurrentSensorImproved::getCurrentVoltage(void) const
 {
-    return mAdcWithDma.getVoltage(mPhaseCurrentValue);
+    return mAdc1.getVoltage(mPhaseCurrentValue);
 }
 
-void PhaseCurrentSensor::initialize(void) const
+void PhaseCurrentSensorImproved::doWhatever(const uint16_t value) const
+{
+
+}
+
+void PhaseCurrentSensorImproved::initialize(void) const
 {
     TIM_OC4Init(mHBridge.mTim.getBasePointer(), &mAdcTrgoConfiguration);
     TIM_OC4PreloadConfig(mHBridge.mTim.getBasePointer(), TIM_OCPreload_Enable);
@@ -149,12 +154,13 @@ void PhaseCurrentSensor::initialize(void) const
     /* Channel 4 output compare signal is connected to TRGO */
     TIM_SelectOutputTrigger(mHBridge.mTim.getBasePointer(), (uint16_t)TIM_TRGOSource_OC4Ref);
     //Channel 5 Output Compare signal is connected to TRG022 which is connected to ADC23
-    TIM_SelectOutputTrigger2(mHBridge.mTim.getBasePointer(), (uint16_t)TIM_TRG02Source_0C5Ref);
+    //TIM_SelectOutputTrigger2(mHBridge.mTim.getBasePointer(), (uint16_t)TIM_TRG02Source_0C5Ref);
     setPulsWidthForTriggerPerMill(1);
+    mAdc1.registerInterruptCallback([&](uint16_t value){this->doWhatever(value);});
 }
 
-constexpr const std::array<const PhaseCurrentSensor,
-                           PhaseCurrentSensor::Description::__ENUM__SIZE> Factory<PhaseCurrentSensor>::Container;
+constexpr const std::array<const PhaseCurrentSensorImproved,
+                           PhaseCurrentSensorImproved::Description::__ENUM__SIZE> Factory<PhaseCurrentSensorImproved>::Container;
 std::array<std::array<uint16_t,
-                      PhaseCurrentSensor::MAX_NUMBER_OF_MEASUREMENTS>,
-           PhaseCurrentSensor::Description::__ENUM__SIZE> PhaseCurrentSensor::MeasurementValueBuffer;
+                      PhaseCurrentSensorImproved::MAX_NUMBER_OF_MEASUREMENTS>,
+           PhaseCurrentSensorImproved::Description::__ENUM__SIZE> PhaseCurrentSensorImproved::MeasurementValueBuffer;

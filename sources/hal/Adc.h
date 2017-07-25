@@ -71,7 +71,7 @@ private:
     float getVoltage(const Adc::Channel&) const;
     void startConversion(const Adc::Channel&) const;
     void stopConversion(void) const;
-    void registerInterruptCallback(std:.function<void(uint16-t)> function) const;
+    void registerInterruptCallback(std::function<void(uint16_t)> function) const;
     void unregisterInterruptCallback(void) const;
 
     static std::array<uint32_t, Description::__ENUM__SIZE> CalibrationValues;

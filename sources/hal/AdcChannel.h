@@ -78,6 +78,7 @@ private:
     friend struct AdcWithDma;
     friend class Factory<Adc::Channel>;
     friend struct PhaseCurrentSensor;
+    friend struct PhaseCurrentSensorImproved;
 };
 
 template<>

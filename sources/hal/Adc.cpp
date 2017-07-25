@@ -40,7 +40,7 @@ extern "C" void ADC1_2_IRQHandler(void)
     if (ADC_GetITStatus(adc2.getBasePointer(), ADC_FLAG_EOC) == SET) {
         Adc::ConversionCompleteSemaphores[static_cast<size_t>(adc2.mDescription)].giveFromISR();
         if(Adc::ConversionDoneCallbacks[static_cast<size_t>(adc2.mDescription)]) {
-            Adc::ConversionDoneCallbacks[static_cast<size_t>(adc2.mDescription)]();
+            Adc::ConversionDoneCallbacks[static_cast<size_t>(adc2.mDescription)](ADC_GetConversionValue(reinterpret_cast<ADC_TypeDef*>(adc2.mPeripherie)));
         }
         ADC_ClearITPendingBit(adc2.getBasePointer(), ADC_FLAG_EOC);
     }
@@ -48,14 +48,14 @@ extern "C" void ADC1_2_IRQHandler(void)
 
 extern "C" void ADC3_IRQHandler(void)
 {
-    constexpr auto& adc = Factory<Adc>::get<Adc::Description::PMD_ADC3>();
+    constexpr auto& adc3 = Factory<Adc>::get<Adc::Description::PMD_ADC3>();
 
-    if (ADC_GetITStatus(adc.getBasePointer(), ADC_FLAG_EOC) == SET) {
-        Adc::ConversionCompleteSemaphores[static_cast<size_t>(adc.mDescription)].giveFromISR();
-        if(Adc::ConversionDoneCallbacks[static_cast<size_t>(adc.mDescription)]) {
-            Adc::ConversionDoneCallbacks[static_cast<size_t>(adc.mDescription)]();
+    if (ADC_GetITStatus(adc3.getBasePointer(), ADC_FLAG_EOC) == SET) {
+        Adc::ConversionCompleteSemaphores[static_cast<size_t>(adc3.mDescription)].giveFromISR();
+        if(Adc::ConversionDoneCallbacks[static_cast<size_t>(adc3.mDescription)]) {
+            Adc::ConversionDoneCallbacks[static_cast<size_t>(adc3.mDescription)](ADC_GetConversionValue(reinterpret_cast<ADC_TypeDef*>(adc3.mPeripherie)));
         }
-        ADC_ClearITPendingBit(adc.getBasePointer(), ADC_FLAG_EOC);
+        ADC_ClearITPendingBit(adc3.getBasePointer(), ADC_FLAG_EOC);
     }
 }
 

@@ -115,6 +115,8 @@ ${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/TimPwm.o
 ${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/Usart.o
 ${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/UsartWithDma.o
 ${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/PhaseCurrentSensor.o
+${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/PhaseCurrentSensorImproved.o
+
 
 # DEV Layer
 ${BINDIR}/${PRJ_NAME}.elf: ${OBJDIR}/Battery.o

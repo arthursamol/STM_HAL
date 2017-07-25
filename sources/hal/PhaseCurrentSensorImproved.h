@@ -13,26 +13,27 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 
-#ifndef SOURCES_PMD_PHASE_CURRENT_SENSOR_H_
-#define SOURCES_PMD_PHASE_CURRENT_SENSOR_H_
+#ifndef SOURCES_PMD_PHASE_CURRENT_IMPROVED_SENSOR_H_
+#define SOURCES_PMD_PHASE_CURRENT_IMPROVED_SENSOR_H_
 
 #include <cstdint>
 #include <array>
 #include "hal_Factory.h"
 #include "stm32f30x_syscfg.h"
 #include "TimHalfBridge.h"
-#include "AdcWithDma.h"
+#include "AdcChannel.h"
+#include "Adc.h"
 
 namespace hal
 {
-struct PhaseCurrentSensor {
-#include "PhaseCurrentSensor_config.h"
+struct PhaseCurrentSensorImproved {
+#include "PhaseCurrentSensorImproved_config.h"
 
-    PhaseCurrentSensor() = delete;
-    PhaseCurrentSensor(const PhaseCurrentSensor&) = delete;
-    PhaseCurrentSensor(PhaseCurrentSensor &&) = default;
-    PhaseCurrentSensor& operator=(const PhaseCurrentSensor&) = delete;
-    PhaseCurrentSensor& operator=(PhaseCurrentSensor &&) = delete;
+    PhaseCurrentSensorImproved() = delete;
+    PhaseCurrentSensorImproved(const PhaseCurrentSensorImproved&) = delete;
+    PhaseCurrentSensorImproved(PhaseCurrentSensorImproved &&) = default;
+    PhaseCurrentSensorImproved& operator=(const PhaseCurrentSensorImproved&) = delete;
+    PhaseCurrentSensorImproved& operator=(PhaseCurrentSensorImproved &&) = delete;
 
     float getPhaseCurrent(void) const;
     float getCurrentVoltage(void) const;
@@ -47,18 +48,20 @@ struct PhaseCurrentSensor {
     size_t getNumberOfMeasurementsForPhaseCurrentValue(void) const;
 
 private:
-    constexpr PhaseCurrentSensor(const enum Description&  desc,
+    constexpr PhaseCurrentSensorImproved(const enum Description&  desc,
                                  const HalfBridge&        hBridge,
-                                 const AdcWithDma&        adc,
+                                 const Adc::Channel&        adc1,
+                                 const Adc::Channel&        adc2,
                                  const TIM_OCInitTypeDef& adcTrgoConf) :
-        mDescription(desc), mHBridge(hBridge), mAdcWithDma(adc), mAdcTrgoConfiguration(adcTrgoConf){}
+        mDescription(desc), mHBridge(hBridge), mAdc1(adc1), mAdc2(adc2), mAdcTrgoConfiguration(adcTrgoConf){}
 
     void updateCurrentValue(void) const;
     void initialize(void) const;
 
     const enum Description mDescription;
     const HalfBridge& mHBridge;
-    const AdcWithDma& mAdcWithDma;
+    const Adc::Channel& mAdc1;
+    const Adc::Channel& mAdc2;
     const TIM_OCInitTypeDef mAdcTrgoConfiguration;
 
     mutable float mPhaseCurrentValue = 0;
@@ -67,7 +70,7 @@ private:
 
     mutable os::Semaphore* mValueAvailableSemaphore = nullptr;
 
-    friend class Factory<PhaseCurrentSensor>;
+    friend class Factory<PhaseCurrentSensorImproved>;
 
     static std::array<
                       std::array<uint16_t, MAX_NUMBER_OF_MEASUREMENTS>,
@@ -75,9 +78,9 @@ private:
 };
 
 template<>
-class Factory<PhaseCurrentSensor>
+class Factory<PhaseCurrentSensorImproved>
 {
-#include "PhaseCurrentSensor_config.h"
+#include "PhaseCurrentSensorImproved_config.h"
 
     Factory(void)
     {
@@ -90,12 +93,12 @@ class Factory<PhaseCurrentSensor>
     }
 public:
 
-    template<enum PhaseCurrentSensor::Description index>
-    static constexpr const PhaseCurrentSensor& get(void)
+    template<enum PhaseCurrentSensorImproved::Description index>
+    static constexpr const PhaseCurrentSensorImproved& get(void)
     {
         static_assert(Container[index].mHBridge.mDescription != hal::HalfBridge::Description::__ENUM__SIZE,
                       "Invalid Tim Object");
-        static_assert(index != PhaseCurrentSensor::Description::__ENUM__SIZE, "__ENUM__SIZE is not accessible");
+        static_assert(index != PhaseCurrentSensorImproved::Description::__ENUM__SIZE, "__ENUM__SIZE is not accessible");
         static_assert(Container[index].mDescription == index, "Wrong mapping between Description and Container");
 
         return Container[index];
