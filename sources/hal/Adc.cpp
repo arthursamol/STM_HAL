@@ -40,7 +40,11 @@ extern "C" void ADC1_2_IRQHandler(void)
     if (ADC_GetITStatus(adc2.getBasePointer(), ADC_FLAG_EOC) == SET) {
         Adc::ConversionCompleteSemaphores[static_cast<size_t>(adc2.mDescription)].giveFromISR();
         if(Adc::ConversionDoneCallbacks[static_cast<size_t>(adc2.mDescription)]) {
+<<<<<<< HEAD
         	Adc::ConversionDoneCallbacks[static_cast<size_t>(adc2.mDescription)]();
+=======
+            Adc::ConversionDoneCallbacks[static_cast<size_t>(adc2.mDescription)]();
+>>>>>>> e686532d86e31bd9edd16b9adc51c43199d1c4c5
         }
         ADC_ClearITPendingBit(adc2.getBasePointer(), ADC_FLAG_EOC);
     }
@@ -53,7 +57,11 @@ extern "C" void ADC3_IRQHandler(void)
     if (ADC_GetITStatus(adc.getBasePointer(), ADC_FLAG_EOC) == SET) {
         Adc::ConversionCompleteSemaphores[static_cast<size_t>(adc.mDescription)].giveFromISR();
         if(Adc::ConversionDoneCallbacks[static_cast<size_t>(adc.mDescription)]) {
+<<<<<<< HEAD
         	Adc::ConversionDoneCallbacks[static_cast<size_t>(adc.mDescription)]();
+=======
+            Adc::ConversionDoneCallbacks[static_cast<size_t>(adc.mDescription)]();
+>>>>>>> e686532d86e31bd9edd16b9adc51c43199d1c4c5
         }
         ADC_ClearITPendingBit(adc.getBasePointer(), ADC_FLAG_EOC);
     }
@@ -161,12 +169,20 @@ void Adc::stopConversion(void) const
 
 void Adc::registerInterruptCallback(std::function<void(uint16_t)> function) const
 {
+<<<<<<< HEAD
 	ConversionDoneCallbacks[mDescription] = function;
+=======
+    ConversionDoneCallbacks[mDescription] = function;
+>>>>>>> e686532d86e31bd9edd16b9adc51c43199d1c4c5
 }
 
 void Adc::unregisterInterruptCallback(void) const
 {
+<<<<<<< HEAD
 	ConversionDoneCallbacks[mDescription] = nullptr;
+=======
+    ConversionDoneCallbacks[mDescription] = nullptr;
+>>>>>>> e686532d86e31bd9edd16b9adc51c43199d1c4c5
 }
 
 std::array<uint32_t, Adc::Description::__ENUM__SIZE> Adc::CalibrationValues;

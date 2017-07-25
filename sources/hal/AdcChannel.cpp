@@ -38,12 +38,20 @@ uint32_t Adc::Channel::getValue(void) const
 
 void Adc::Channel::registerInterruptCallback(std::function<void(uint16_t)> function) const
 {
+<<<<<<< HEAD
 	mBaseAdc.registerInterruptCallback(function);
+=======
+    mBaseAdc.registerInterruptCallback(function);
+>>>>>>> e686532d86e31bd9edd16b9adc51c43199d1c4c5
 }
 
 void Adc::Channel::unregisterInterruptCallback(void) const
 {
+<<<<<<< HEAD
 	mBaseAdc.unregisterInterruptCallback();
+=======
+    mBaseAdc.unregisterInterruptCallback();
+>>>>>>> e686532d86e31bd9edd16b9adc51c43199d1c4c5
 }
 
 void Adc::Channel::startConversion(void) const
