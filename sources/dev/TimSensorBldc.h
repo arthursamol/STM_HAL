@@ -22,7 +22,7 @@
 #include "TimHalfBridge.h"
 #include "TimHallDecoder.h"
 #include "TimHallMeter.h"
-#include "PhaseCurrentSensor.h"
+#include "PhaseCurrentSensorImproved.h"
 
 namespace dev
 {
@@ -68,7 +68,7 @@ struct SensorBLDC {
     const float mMotorCoilResistance = 0.0;
     const float mMotorGeneratorConstant = 0.0;
 
-    const hal::PhaseCurrentSensor& mPhaseCurrentSensor;
+    const hal::PhaseCurrentSensorImproved& mPhaseCurrentSensor;
     const hal::HalfBridge& mHBridge;
     const hal::HallDecoder& mHallDecoder;
     const hal::HallMeter& mHallMeter1;
@@ -79,7 +79,7 @@ private:
                          const float                    motorConstant,
                          const float                    motorCoilResistance,
                          const float                    motorGeneratorConstant,
-                         const hal::PhaseCurrentSensor& currentSensor,
+                         const hal::PhaseCurrentSensorImproved& currentSensor,
                          const hal::HalfBridge&         hBridge,
                          const hal::HallDecoder&        hallDecoder,
                          const hal::HallMeter&          hallMeter1,
@@ -126,7 +126,7 @@ class Factory<SensorBLDC>
                      0.065,
                      0.33,
                      144,
-                     hal::Factory<hal::PhaseCurrentSensor>::get<hal::PhaseCurrentSensor::I_TOTAL_FB>(),
+                     hal::Factory<hal::PhaseCurrentSensorImproved>::get<hal::PhaseCurrentSensorImproved::I_TOTAL_FB>(),
                      hal::Factory<hal::HalfBridge>::get<hal::HalfBridge::BLDC_PWM>(),
                      hal::Factory<hal::HallDecoder>::get<hal::HallDecoder::BLDC_DECODER>(),
                      hal::Factory<hal::HallMeter>::get<hal::HallMeter::BLDC_METER_32BIT>(),

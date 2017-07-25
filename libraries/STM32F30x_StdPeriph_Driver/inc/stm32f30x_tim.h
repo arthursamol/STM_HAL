@@ -1246,7 +1246,7 @@ void TIM_OC1Init(TIM_TypeDef* TIMx, TIM_OCInitTypeDef const * TIM_OCInitStruct);
 void TIM_OC2Init(TIM_TypeDef* TIMx, TIM_OCInitTypeDef const * TIM_OCInitStruct);
 void TIM_OC3Init(TIM_TypeDef* TIMx, TIM_OCInitTypeDef const * TIM_OCInitStruct);
 void TIM_OC4Init(TIM_TypeDef* TIMx, TIM_OCInitTypeDef const * TIM_OCInitStruct);
-void TIM_OC5Init(TIM_TypeDef* TIMx, TIM_OCInitTypeDef* TIM_OCInitStruct);
+void TIM_OC5Init(TIM_TypeDef* TIMx, TIM_OCInitTypeDef * TIM_OCInitStruct);
 void TIM_OC6Init(TIM_TypeDef* TIMx, TIM_OCInitTypeDef* TIM_OCInitStruct);
 void TIM_SelectGC5C1(TIM_TypeDef* TIMx, FunctionalState NewState);
 void TIM_SelectGC5C2(TIM_TypeDef* TIMx, FunctionalState NewState);

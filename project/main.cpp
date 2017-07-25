@@ -96,7 +96,7 @@ int main(void)
     hal::initFactory<hal::Factory<hal::Adc> >();
     hal::initFactory<hal::Factory<hal::Adc::Channel> >();
     hal::initFactory<hal::Factory<hal::AdcWithDma> >();
-    hal::initFactory<hal::Factory<hal::PhaseCurrentSensor> >();
+    hal::initFactory<hal::Factory<hal::PhaseCurrentSensorImproved> >();
     hal::initFactory<hal::Factory<hal::Crc> >();
     hal::initFactory<hal::Factory<hal::I2c> >();
     hal::initFactory<hal::Factory<hal::Comp> >();

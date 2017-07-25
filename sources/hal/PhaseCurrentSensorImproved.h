@@ -46,6 +46,7 @@ struct PhaseCurrentSensorImproved {
     void enable(void) const;
     void disable(void) const;
     size_t getNumberOfMeasurementsForPhaseCurrentValue(void) const;
+    void doWhatever(const uint16_t value) const;
 
 private:
     constexpr PhaseCurrentSensorImproved(const enum Description&  desc,
