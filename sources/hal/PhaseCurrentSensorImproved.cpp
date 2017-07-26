@@ -84,9 +84,10 @@ size_t PhaseCurrentSensorImproved::getNumberOfMeasurementsForPhaseCurrentValue(v
     return mNumberOfMeasurementsForPhaseCurrentValue;
 }
 
+
 void PhaseCurrentSensorImproved::updateCurrentValue(void) const
 {
-    auto& array = MeasurementValueBuffer[mDescription];
+/*    auto& array = MeasurementValueBuffer[mDescription];
 
     for (size_t i = 0; i < mNumberOfMeasurementsForPhaseCurrentValue; i++) {
         mPhaseCurrentValue -= mPhaseCurrentValue / FILTERWIDTH;
@@ -96,16 +97,21 @@ void PhaseCurrentSensorImproved::updateCurrentValue(void) const
     if (mValueAvailableSemaphore) {
         mValueAvailableSemaphore->giveFromISR();
     }
+*/
 }
 
 void PhaseCurrentSensorImproved::registerValueAvailableSemaphore(os::Semaphore* valueAvailable) const
 {
+/*
     mValueAvailableSemaphore = valueAvailable;
+*/
 }
 
 void PhaseCurrentSensorImproved::unregisterValueAvailableSemaphore(void) const
 {
+/*
     mValueAvailableSemaphore = nullptr;
+*/
 }
 
 void PhaseCurrentSensorImproved::enable(void) const
@@ -156,22 +162,22 @@ float PhaseCurrentSensorImproved::getCurrentVoltage(void) const
 void PhaseCurrentSensorImproved::interpretPhaseA(const uint16_t value) const
 {
     //if transistor A is open, use his value, else use value from B
-    if(mHBridge.getCurrentTransistorState((uint16_t) 0) == false)  //if A is colosed use value from B
+    if(mHBridge.getCurrentTransistorState((uint16_t) 0) == false)  //if A is closed use value from B
     {
-        MeasurementValueBufferImproved[(mMeasureCounter++)%MAX_NUMBER_OF_MEASUREMENTS] = value * (-2);
+        MeasurementValueBufferImproved[(mMeasureCounter++)%MAX_NUMBER_OF_MEASUREMENTS] = value * (2);
     }
-    TraceLight("A: %d \n",value);
+    //TraceLight("A: %d \n",value);
 }
 
 
 void PhaseCurrentSensorImproved::interpretPhaseB(const uint16_t value) const
 {
     //only use value from transistor B if A is closed
-    if(mHBridge.getCurrentTransistorState((uint16_t) 0) == true)  //if A is colosed use value from B
+    if(mHBridge.getCurrentTransistorState((uint16_t) 0) == true)  //if A is closed use value from B
     {
-        MeasurementValueBufferImproved[(mMeasureCounter++)%MAX_NUMBER_OF_MEASUREMENTS] = value * (-2);
+        MeasurementValueBufferImproved[(mMeasureCounter++)%MAX_NUMBER_OF_MEASUREMENTS] = value * (2);
     }
-    TraceLight("        B: %d \n",value);
+    //TraceLight("        B: %d \n",value);
 }
 
 void PhaseCurrentSensorImproved::initialize(void) const
