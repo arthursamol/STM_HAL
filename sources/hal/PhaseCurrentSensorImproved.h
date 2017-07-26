@@ -90,7 +90,13 @@ class Factory<PhaseCurrentSensorImproved>
         }
 
         // if TIM20 provides trigger signal for ADC34, this trigger has to be remaped
+        SYSCFG_ADCTriggerRemapConfig(REMAPADCTRIGGER_ADC34_EXT6, ENABLE);
         SYSCFG_ADCTriggerRemapConfig(REMAPADCTRIGGER_ADC34_EXT5, ENABLE);
+
+        SYSCFG_ADCTriggerRemapConfig(REMAPADCTRIGGER_ADC12_EXT3, ENABLE);
+        SYSCFG_ADCTriggerRemapConfig(REMAPADCTRIGGER_ADC12_EXT2, ENABLE);
+
+
     }
 public:
 

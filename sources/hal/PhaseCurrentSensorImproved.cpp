@@ -41,14 +41,13 @@ void PhaseCurrentSensorImproved::setPulsWidthForTriggerPerMill(uint32_t value) c
     static const uint32_t sampleTime = 2 ;//<< mAdc1.getAdcSampleTime();
 
     // TODO Magic Numbers refactoring
-//    uint32_t valueTmp = value;
     value = static_cast<uint32_t>(static_cast<float>(value) * scale) * (0.45); // + value / 5000.0);
-//    value += sampleTime;
-//
-//    TIM_SetCompare4(mHBridge.mTim.getBasePointer(),
-//                    static_cast<uint32_t>(std::max(
-//                                                   static_cast<int32_t>(value + HalfBridge::DEFAULT_DEADTIME),
-//                                                   static_cast<int32_t>(1))));
+    value += sampleTime;
+
+    TIM_SetCompare4(mHBridge.mTim.getBasePointer(),
+                    static_cast<uint32_t>(std::max(
+                                                   static_cast<int32_t>(value + HalfBridge::DEFAULT_DEADTIME),
+                                                   static_cast<int32_t>(1))));
 
     //Modify variable value for off part of duty cycle
     value = ((HalfBridge::MAXIMAL_PWM_IN_MILL - value) * 0.5) + value;
@@ -107,14 +106,15 @@ void PhaseCurrentSensorImproved::unregisterValueAvailableSemaphore(void) const
 void PhaseCurrentSensorImproved::enable(void) const
 {
 	mAdc1.startConversion();
+	mAdc2.startConversion();
     //mAdc1.startConversion(MeasurementValueBuffer[mDescription], [&] {this->updateCurrentValue();
     //                            });
-	int b = 0;
 }
 
 void PhaseCurrentSensorImproved::disable(void) const
 {
-    //mAdc1.stopConversion();
+    mAdc1.stopConversion();
+    mAdc2.stopConversion();
 }
 
 void PhaseCurrentSensorImproved::reset(void) const
@@ -146,6 +146,8 @@ void PhaseCurrentSensorImproved::doWhatever(const uint16_t value) const
 	uint16_t val;
 	uint16_t sum = 0;
 
+	TraceLight("%d \n",value);
+
 
 	for(val = 0; val < 10u; val++){
 		sum++;
@@ -157,8 +159,8 @@ void PhaseCurrentSensorImproved::initialize(void) const
     TIM_OC4Init(mHBridge.mTim.getBasePointer(), &mAdcTrgoConfiguration);
     TIM_OC4PreloadConfig(mHBridge.mTim.getBasePointer(), TIM_OCPreload_Enable);
 
-    //TIM_OC5Init(mHBridge.mTim.getBasePointer(), &mAdcTrgoConfiguration);
-    //TIM_OC5PreloadConfig(mHBridge.mTim.getBasePointer(), TIM_OCPreload_Enable);
+    TIM_OC5Init(mHBridge.mTim.getBasePointer(), &mAdcTrgoConfiguration);
+    TIM_OC5PreloadConfig(mHBridge.mTim.getBasePointer(), TIM_OCPreload_Enable);
 
     TIM_SelectMasterSlaveMode(mHBridge.mTim.getBasePointer(), TIM_MasterSlaveMode_Enable);
 
@@ -166,11 +168,13 @@ void PhaseCurrentSensorImproved::initialize(void) const
     TIM_SelectOutputTrigger(mHBridge.mTim.getBasePointer(), (uint16_t)TIM_TRGOSource_OC4Ref);
 
     //Channel 5 Output Compare signal is connected to TRG022 which is connected to ADC23
-    TIM_SelectOutputTrigger2(mHBridge.mTim.getBasePointer(), (uint16_t)TIM_TRGO2Source_OC5Ref);
+    TIM_SelectOutputTrigger2(mHBridge.mTim.getBasePointer(), TIM_TRGO2Source_OC5RefRising_OC6RefFalling);
 
 
     setPulsWidthForTriggerPerMill(1);
     mAdc1.registerInterruptCallback([&](uint16_t value){this->doWhatever(value);});
+    mAdc2.registerInterruptCallback([&](uint16_t value){this->doWhatever(value);});
+
 }
 
 constexpr const std::array<const PhaseCurrentSensorImproved,

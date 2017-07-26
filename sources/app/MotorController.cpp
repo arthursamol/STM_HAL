@@ -87,7 +87,7 @@ void MotorController::motorControllerTaskFunction(const bool& join)
         updatePwmOutput();
         updateQuadrant();
 
-#if 1
+#if 0
         TraceLight(
                    "tick: %5d\t"
                    "Soll: %5d\t"

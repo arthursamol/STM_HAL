@@ -48,6 +48,7 @@ enum Description {
     HALL3,
     COMP_3_INM,
     // ===PORTE===
+	TIM20_CH4,
     A_HS,
     B_HS,
     A_LS,
@@ -177,6 +178,11 @@ static constexpr const std::array<const Gpio, Gpio::__ENUM__SIZE + 1> Container 
            GPIOD_BASE,
            GPIO_InitTypeDef { GPIO_Pin_15, GPIO_Mode_AN, GPIO_Speed_50MHz, GPIO_OType_PP, GPIO_PuPd_NOPULL}),
       // ===================PORTE=================
+		   Gpio(Gpio::TIM20_CH4, //TIM20
+		              GPIOE_BASE,
+		              GPIO_InitTypeDef {GPIO_Pin_1, GPIO_Mode_AF, GPIO_Speed_2MHz, GPIO_OType_PP, GPIO_PuPd_DOWN},
+		              GPIO_PinSource1,
+		              GPIO_AF_6),
       Gpio(Gpio::A_HS, //TIM20
            GPIOE_BASE,
            GPIO_InitTypeDef {GPIO_Pin_2, GPIO_Mode_AF, GPIO_Speed_2MHz, GPIO_OType_PP, GPIO_PuPd_DOWN},
