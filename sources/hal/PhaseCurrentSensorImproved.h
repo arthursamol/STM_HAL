@@ -78,8 +78,6 @@ private:
     static std::array<
                       std::array<uint16_t, MAX_NUMBER_OF_MEASUREMENTS>,
                       Description::__ENUM__SIZE> MeasurementValueBuffer;
-
-    static std::array<uint16_t, MAX_NUMBER_OF_MEASUREMENTS> MeasurementValueBufferImproved;
 };
 
 template<>
