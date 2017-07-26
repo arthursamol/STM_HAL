@@ -38,24 +38,29 @@ void PhaseCurrentSensorImproved::setPulsWidthForTriggerPerMill(uint32_t value) c
     float scale = static_cast<float>(mHBridge.mTim.getPeriode()) /
                   static_cast<float>(HalfBridge::MAXIMAL_PWM_IN_MILL);
 
-    static const uint32_t sampleTime = 2 ;//<< mAdc1.getAdcSampleTime();
+    //static const uint32_t sampleTime = 2 ;//<< mAdc1.getAdcSampleTime();
+    //half high dutty
+    //value = static_cast<uint32_t>(static_cast<float>(value) * scale) * (0.45); // + value / 5000.0);
+    //value += sampleTime;
 
-    // TODO Magic Numbers refactoring
-    value = static_cast<uint32_t>(static_cast<float>(value) * scale) * (0.45); // + value / 5000.0);
-    value += sampleTime;
-
-    TIM_SetCompare4(mHBridge.mTim.getBasePointer(),
-                    static_cast<uint32_t>(std::max(
-                                                   static_cast<int32_t>(value + HalfBridge::DEFAULT_DEADTIME),
-                                                   static_cast<int32_t>(1))));
+//    TIM_SetCompare4(mHBridge.mTim.getBasePointer(),
+//                    static_cast<uint32_t>(std::max(
+//                                                   static_cast<int32_t>(value + HalfBridge::DEFAULT_DEADTIME),
+//                                                   static_cast<int32_t>(1))));
 
     //Modify variable value for off part of duty cycle
-    value = ((HalfBridge::MAXIMAL_PWM_IN_MILL - value) * 0.5) + value;
+    //half low dutty
+    value = ((HalfBridge::MAXIMAL_PWM_IN_MILL - (value*scale)) * 0.5) + (value*scale);
+    TIM_SetCompare4(mHBridge.mTim.getBasePointer(),
+                                    static_cast<uint32_t>(std::max(
+                                    static_cast<int32_t>(value + HalfBridge::DEFAULT_DEADTIME),
+                                    static_cast<int32_t>(1))));
 
-    TIM_SetCompare5(mHBridge.mTim.getBasePointer(),
-                        static_cast<uint32_t>(std::max(
-                                                        static_cast<int32_t>(value + HalfBridge::DEFAULT_DEADTIME),
-                                                        static_cast<int32_t>(1))));
+
+//    TIM_SetCompare5(mHBridge.mTim.getBasePointer(),
+//                        static_cast<uint32_t>(std::max(
+//                                                        static_cast<int32_t>(value + HalfBridge::DEFAULT_DEADTIME),
+//                                                        static_cast<int32_t>(1))));
 }
 
 void PhaseCurrentSensorImproved::setNumberOfMeasurementsForPhaseCurrentValue(uint32_t value) const
@@ -138,20 +143,35 @@ float PhaseCurrentSensorImproved::getPhaseCurrent(void) const
 
 float PhaseCurrentSensorImproved::getCurrentVoltage(void) const
 {
-    return mAdc1.getVoltage(mPhaseCurrentValue);
+    uint32_t summForAverage = 0;
+    for (uint32_t runner; runner <MAX_NUMBER_OF_MEASUREMENTS; ++runner)
+    {
+        summForAverage+= MeasurementValueBufferImproved[runner];
+    }
+    mPhaseCurrentValue = summForAverage/MAX_NUMBER_OF_MEASUREMENTS;  //todo: not got, check how many there are
+    return mPhaseCurrentValue;
+    //mAdc1.getVoltage(mPhaseCurrentValue);
 }
 
-void PhaseCurrentSensorImproved::doWhatever(const uint16_t value) const
+void PhaseCurrentSensorImproved::interpretPhaseA(const uint16_t value) const
 {
-	uint16_t val;
-	uint16_t sum = 0;
+    //if transistor A is open, use his value, else use value from B
+    if(mHBridge.getCurrentTransistorState((uint16_t) 0) == false)  //if A is colosed use value from B
+    {
+        MeasurementValueBufferImproved[(mMeasureCounter++)%MAX_NUMBER_OF_MEASUREMENTS] = value * (-2);
+    }
+    TraceLight("A: %d \n",value);
+}
 
-	TraceLight("%d \n",value);
 
-
-	for(val = 0; val < 10u; val++){
-		sum++;
-	}
+void PhaseCurrentSensorImproved::interpretPhaseB(const uint16_t value) const
+{
+    //only use value from transistor B if A is closed
+    if(mHBridge.getCurrentTransistorState((uint16_t) 0) == true)  //if A is colosed use value from B
+    {
+        MeasurementValueBufferImproved[(mMeasureCounter++)%MAX_NUMBER_OF_MEASUREMENTS] = value * (-2);
+    }
+    TraceLight("        B: %d \n",value);
 }
 
 void PhaseCurrentSensorImproved::initialize(void) const
@@ -159,8 +179,8 @@ void PhaseCurrentSensorImproved::initialize(void) const
     TIM_OC4Init(mHBridge.mTim.getBasePointer(), &mAdcTrgoConfiguration);
     TIM_OC4PreloadConfig(mHBridge.mTim.getBasePointer(), TIM_OCPreload_Enable);
 
-    TIM_OC5Init(mHBridge.mTim.getBasePointer(), &mAdcTrgoConfiguration);
-    TIM_OC5PreloadConfig(mHBridge.mTim.getBasePointer(), TIM_OCPreload_Enable);
+    //TIM_OC5Init(mHBridge.mTim.getBasePointer(), &mAdcTrgoConfiguration);
+    //TIM_OC5PreloadConfig(mHBridge.mTim.getBasePointer(), TIM_OCPreload_Enable);
 
     TIM_SelectMasterSlaveMode(mHBridge.mTim.getBasePointer(), TIM_MasterSlaveMode_Enable);
 
@@ -168,13 +188,12 @@ void PhaseCurrentSensorImproved::initialize(void) const
     TIM_SelectOutputTrigger(mHBridge.mTim.getBasePointer(), (uint16_t)TIM_TRGOSource_OC4Ref);
 
     //Channel 5 Output Compare signal is connected to TRG022 which is connected to ADC23
-    TIM_SelectOutputTrigger2(mHBridge.mTim.getBasePointer(), TIM_TRGO2Source_OC5RefRising_OC6RefFalling);
+    //TIM_SelectOutputTrigger2(mHBridge.mTim.getBasePointer(), (uint16_t)TIM_TRGO2Source_OC5Ref);
 
 
     setPulsWidthForTriggerPerMill(1);
-    mAdc1.registerInterruptCallback([&](uint16_t value){this->doWhatever(value);});
-    mAdc2.registerInterruptCallback([&](uint16_t value){this->doWhatever(value);});
-
+    mAdc1.registerInterruptCallback([&](uint16_t value){this->interpretPhaseA(value);});
+    mAdc2.registerInterruptCallback([&](uint16_t value){this->interpretPhaseB(value);});
 }
 
 constexpr const std::array<const PhaseCurrentSensorImproved,
@@ -182,3 +201,5 @@ constexpr const std::array<const PhaseCurrentSensorImproved,
 std::array<std::array<uint16_t,
                       PhaseCurrentSensorImproved::MAX_NUMBER_OF_MEASUREMENTS>,
            PhaseCurrentSensorImproved::Description::__ENUM__SIZE> PhaseCurrentSensorImproved::MeasurementValueBuffer;
+
+std::array<uint16_t, PhaseCurrentSensorImproved::MAX_NUMBER_OF_MEASUREMENTS> PhaseCurrentSensorImproved::MeasurementValueBufferImproved;

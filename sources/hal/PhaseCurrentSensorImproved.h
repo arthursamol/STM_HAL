@@ -46,7 +46,8 @@ struct PhaseCurrentSensorImproved {
     void enable(void) const;
     void disable(void) const;
     size_t getNumberOfMeasurementsForPhaseCurrentValue(void) const;
-    void doWhatever(const uint16_t value) const;
+    void interpretPhaseA(const uint16_t value) const;
+    void interpretPhaseB(const uint16_t value) const;
 
 private:
     constexpr PhaseCurrentSensorImproved(const enum Description&  desc,
@@ -68,6 +69,7 @@ private:
     mutable float mPhaseCurrentValue = 0;
     mutable uint16_t mOffsetValue = 2000;
     mutable size_t mNumberOfMeasurementsForPhaseCurrentValue = MAX_NUMBER_OF_MEASUREMENTS;
+    mutable size_t mMeasureCounter = 0;
 
     mutable os::Semaphore* mValueAvailableSemaphore = nullptr;
 
@@ -76,6 +78,8 @@ private:
     static std::array<
                       std::array<uint16_t, MAX_NUMBER_OF_MEASUREMENTS>,
                       Description::__ENUM__SIZE> MeasurementValueBuffer;
+
+    static std::array<uint16_t, MAX_NUMBER_OF_MEASUREMENTS> MeasurementValueBufferImproved;
 };
 
 template<>

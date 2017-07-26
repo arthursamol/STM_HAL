@@ -60,7 +60,7 @@ struct HalfBridge {
     const enum Description mDescription;
     const Tim& mTim;
 
-    std::array<bool, 6>* getCurrentTransisotrStates();
+    bool getCurrentTransistorState(uint16_t phase) const;
 
 private:
     constexpr HalfBridge(const enum Description&    desc,

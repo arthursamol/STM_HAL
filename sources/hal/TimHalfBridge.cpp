@@ -189,9 +189,20 @@ void HalfBridge::initialize(void) const
     mTim.enable();
 }
 
-std::array<bool, 6>* HalfBridge::getCurrentTransisotrStates()
+bool HalfBridge::getCurrentTransistorState(uint16_t phase) const
 {
-    return &currentTransistorStates;
+    if (phase == 0)     // A AN  B BN  C CN
+    {
+        return currentTransistorStates[0]==1 ? true : false;
+    }
+    else if (phase == 2)
+    {
+        return currentTransistorStates[2]==1 ? true : false;
+    }
+    else
+    {   //default value is phase A
+        return currentTransistorStates[0]==1 ? true : false;
+    }
 }
 
 constexpr const std::array<const HalfBridge, HalfBridge::Description::__ENUM__SIZE> Factory<HalfBridge>::Container;
