@@ -49,18 +49,17 @@ void PhaseCurrentSensorImproved::setPulsWidthForTriggerPerMill(uint32_t value) c
     //                                                   static_cast<int32_t>(1))));
 
     //Modify variable value for off part of duty cycle -> half low dutty
-    value = ((HalfBridge::MAXIMAL_PWM_IN_MILL - (value*scale)) * 0.5) + (value*scale);
+    value = ((HalfBridge::MAXIMAL_PWM_IN_MILL - (value * scale)) * 0.5) + (value * scale);
     TIM_SetCompare4(mHBridge.mTim.getBasePointer(),
-                                    static_cast<uint32_t>(std::max(
-                                    static_cast<int32_t>(value + HalfBridge::DEFAULT_DEADTIME),
-                                    static_cast<int32_t>(1))));
+                    static_cast<uint32_t>(std::max(
+                                                   static_cast<int32_t>(value + HalfBridge::DEFAULT_DEADTIME),
+                                                   static_cast<int32_t>(1))));
 
-
-        // not working
-        //    TIM_SetCompare5(mHBridge.mTim.getBasePointer(),
-        //                        static_cast<uint32_t>(std::max(
-        //                                                        static_cast<int32_t>(value + HalfBridge::DEFAULT_DEADTIME),
-        //                                                        static_cast<int32_t>(1))));
+    // not working
+    //    TIM_SetCompare5(mHBridge.mTim.getBasePointer(),
+    //                        static_cast<uint32_t>(std::max(
+    //                                                        static_cast<int32_t>(value + HalfBridge::DEFAULT_DEADTIME),
+    //                                                        static_cast<int32_t>(1))));
 }
 
 void PhaseCurrentSensorImproved::setNumberOfMeasurementsForPhaseCurrentValue(uint32_t value) const
@@ -84,26 +83,24 @@ size_t PhaseCurrentSensorImproved::getNumberOfMeasurementsForPhaseCurrentValue(v
     return mNumberOfMeasurementsForPhaseCurrentValue;
 }
 
-
 void PhaseCurrentSensorImproved::updateCurrentValue(void) const
 {
     auto& array = MeasurementValueBuffer[mDescription];
-    static uint16_t countCals = 0;
 
     for (size_t i = 0; i < mNumberOfMeasurementsForPhaseCurrentValue; i++) {
         mPhaseCurrentValue -= mPhaseCurrentValue / FILTERWIDTH;
         //use mNumberOfMeasurementsForPhaseCurrentValue many values back from mMeasureCounter, remember its a ringbuffer
-        mPhaseCurrentValue += static_cast<float>(array[((mMeasureCounter-i)+MAX_NUMBER_OF_MEASUREMENTS)%MAX_NUMBER_OF_MEASUREMENTS]) / FILTERWIDTH;
+        mPhaseCurrentValue +=
+            static_cast<float>(array[((mMeasureCounter - i) + MAX_NUMBER_OF_MEASUREMENTS) %
+                                     MAX_NUMBER_OF_MEASUREMENTS]) /
+            FILTERWIDTH;
     }
 
-    countCals++;
     //only inform about new value after 10 measurements
-    if (mValueAvailableSemaphore && countCals>10) {
+    if (mValueAvailableSemaphore) {
         mValueAvailableSemaphore->giveFromISR();
-        countCals = 0;
-        TraceLight("Current: %5.5f \n",mPhaseCurrentValue);
+        TraceLight("Current: %5.5f \n", mPhaseCurrentValue);
     }
-
 }
 
 void PhaseCurrentSensorImproved::registerValueAvailableSemaphore(os::Semaphore* valueAvailable) const
@@ -118,8 +115,8 @@ void PhaseCurrentSensorImproved::unregisterValueAvailableSemaphore(void) const
 
 void PhaseCurrentSensorImproved::enable(void) const
 {
-	mAdc1.startConversion();
-	mAdc2.startConversion();
+    mAdc1.startConversion();
+    mAdc2.startConversion();
     //mAdc1.startConversion(MeasurementValueBuffer[mDescription], [&] {this->updateCurrentValue();
     //                            });
 }
@@ -159,21 +156,28 @@ float PhaseCurrentSensorImproved::getCurrentVoltage(void) const
 void PhaseCurrentSensorImproved::interpretPhaseA(const uint16_t value) const
 {
     //if transistor A is open, use his value, else use value from B
-    if(mHBridge.getCurrentTransistorState((uint16_t) 0) == false)  //if A is closed use value from B
-    {
-        MeasurementValueBuffer[mDescription][(mMeasureCounter++)%MAX_NUMBER_OF_MEASUREMENTS] = value * (2);
+    if (mHBridge.getCurrentTransistorState((uint16_t)0) == false) { //if A is closed use value from B
+        MeasurementValueBuffer[mDescription][(mMeasureCounter++) % MAX_NUMBER_OF_MEASUREMENTS] = value * (2);
+    }
+
+    //calc and notify about new values only everty 10th time
+    if (mMeasureCounter%10 == 0){
+        updateCurrentValue();
     }
     //TraceLight("A: %d \n",value);
 }
 
-
 void PhaseCurrentSensorImproved::interpretPhaseB(const uint16_t value) const
 {
     //only use value from transistor B if A is closed
-    if(mHBridge.getCurrentTransistorState((uint16_t) 0) == true)  //if A is closed use value from B
-    {
-        MeasurementValueBuffer[mDescription][(mMeasureCounter++)%MAX_NUMBER_OF_MEASUREMENTS] = value * (2);
+    if (mHBridge.getCurrentTransistorState((uint16_t)0) == true) { //if A is closed use value from B
+        MeasurementValueBuffer[mDescription][(mMeasureCounter++) % MAX_NUMBER_OF_MEASUREMENTS] = value * (2);
     }
+
+    /*if (mMeasureCounter%10 == 0){
+        updateCurrentValue();
+    }
+    */
     //TraceLight("        B: %d \n",value);
 }
 
@@ -193,14 +197,18 @@ void PhaseCurrentSensorImproved::initialize(void) const
     //Channel 5 Output Compare signal is connected to TRG022 which is connected to ADC23
     //TIM_SelectOutputTrigger2(mHBridge.mTim.getBasePointer(), (uint16_t)TIM_TRGO2Source_OC5Ref);
 
-
     setPulsWidthForTriggerPerMill(1);
-    mAdc1.registerInterruptCallback([&](uint16_t value){this->interpretPhaseA(value);});
-    mAdc2.registerInterruptCallback([&](uint16_t value){this->interpretPhaseB(value);});
+    mAdc1.registerInterruptCallback([&](uint16_t value){
+        this->interpretPhaseA(value);
+    });
+    mAdc2.registerInterruptCallback([&](uint16_t value){
+        this->interpretPhaseB(value);
+    });
 }
 
 constexpr const std::array<const PhaseCurrentSensorImproved,
-                           PhaseCurrentSensorImproved::Description::__ENUM__SIZE> Factory<PhaseCurrentSensorImproved>::Container;
+                           PhaseCurrentSensorImproved::Description::__ENUM__SIZE> Factory<PhaseCurrentSensorImproved>::
+Container;
 std::array<std::array<uint16_t,
                       PhaseCurrentSensorImproved::MAX_NUMBER_OF_MEASUREMENTS>,
            PhaseCurrentSensorImproved::Description::__ENUM__SIZE> PhaseCurrentSensorImproved::MeasurementValueBuffer;

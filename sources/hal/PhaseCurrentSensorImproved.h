@@ -31,9 +31,9 @@ struct PhaseCurrentSensorImproved {
 
     PhaseCurrentSensorImproved() = delete;
     PhaseCurrentSensorImproved(const PhaseCurrentSensorImproved&) = delete;
-    PhaseCurrentSensorImproved(PhaseCurrentSensorImproved &&) = default;
+    PhaseCurrentSensorImproved(PhaseCurrentSensorImproved&&) = default;
     PhaseCurrentSensorImproved& operator=(const PhaseCurrentSensorImproved&) = delete;
-    PhaseCurrentSensorImproved& operator=(PhaseCurrentSensorImproved &&) = delete;
+    PhaseCurrentSensorImproved& operator=(PhaseCurrentSensorImproved&&) = delete;
 
     float getPhaseCurrent(void) const;
     float getCurrentVoltage(void) const;
@@ -51,10 +51,10 @@ struct PhaseCurrentSensorImproved {
 
 private:
     constexpr PhaseCurrentSensorImproved(const enum Description&  desc,
-                                 const HalfBridge&        hBridge,
-                                 const Adc::Channel&        adc1,
-                                 const Adc::Channel&        adc2,
-                                 const TIM_OCInitTypeDef& adcTrgoConf) :
+                                         const HalfBridge&        hBridge,
+                                         const Adc::Channel&      adc1,
+                                         const Adc::Channel&      adc2,
+                                         const TIM_OCInitTypeDef& adcTrgoConf) :
         mDescription(desc), mHBridge(hBridge), mAdc1(adc1), mAdc2(adc2), mAdcTrgoConfiguration(adcTrgoConf){}
 
     void updateCurrentValue(void) const;
@@ -97,8 +97,6 @@ class Factory<PhaseCurrentSensorImproved>
 
         SYSCFG_ADCTriggerRemapConfig(REMAPADCTRIGGER_ADC12_EXT3, ENABLE);
         SYSCFG_ADCTriggerRemapConfig(REMAPADCTRIGGER_ADC12_EXT2, ENABLE);
-
-
     }
 public:
 
