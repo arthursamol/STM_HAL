@@ -25,6 +25,11 @@ using hal::HalfBridge;
 using hal::PhaseCurrentSensorImproved;
 using hal::Tim;
 
+
+/**
+ * @brief Set trigger for ADC
+ * @param value Value in range from 0 to 1000
+ */
 void PhaseCurrentSensorImproved::setPulsWidthForTriggerPerMill(uint32_t value) const
 {
     if (value > HalfBridge::MAXIMAL_PWM_IN_MILL) {
@@ -49,7 +54,8 @@ void PhaseCurrentSensorImproved::setPulsWidthForTriggerPerMill(uint32_t value) c
     //                                                   static_cast<int32_t>(1))));
 
     //Modify variable value for off part of duty cycle -> half low dutty
-    value = ((HalfBridge::MAXIMAL_PWM_IN_MILL - (value * scale)) * 0.5) + (value * scale);
+    value = (((HalfBridge::MAXIMAL_PWM_IN_MILL - value) * 0.5) + value) * scale;
+
     TIM_SetCompare4(mHBridge.mTim.getBasePointer(),
                     static_cast<uint32_t>(std::max(
                                                    static_cast<int32_t>(value + HalfBridge::DEFAULT_DEADTIME),
@@ -92,25 +98,25 @@ void PhaseCurrentSensorImproved::updateCurrentValue(void) const
         //use mNumberOfMeasurementsForPhaseCurrentValue many values back from mMeasureCounter, remember its a ringbuffer
         mPhaseCurrentValue +=
             static_cast<float>(array[((mMeasureCounter - i) + MAX_NUMBER_OF_MEASUREMENTS) %
-                                     MAX_NUMBER_OF_MEASUREMENTS]) /
-            FILTERWIDTH;
+                                     MAX_NUMBER_OF_MEASUREMENTS]) / FILTERWIDTH;
     }
-
+/*
     //only inform about new value after 10 measurements
     if (mValueAvailableSemaphore) {
         mValueAvailableSemaphore->giveFromISR();
         TraceLight("Current: %5.5f \n", mPhaseCurrentValue);
     }
+*/
 }
 
 void PhaseCurrentSensorImproved::registerValueAvailableSemaphore(os::Semaphore* valueAvailable) const
 {
-    mValueAvailableSemaphore = valueAvailable;
+    //mValueAvailableSemaphore = valueAvailable;
 }
 
 void PhaseCurrentSensorImproved::unregisterValueAvailableSemaphore(void) const
 {
-    mValueAvailableSemaphore = nullptr;
+    //mValueAvailableSemaphore = nullptr;
 }
 
 void PhaseCurrentSensorImproved::enable(void) const
@@ -157,12 +163,12 @@ void PhaseCurrentSensorImproved::interpretPhaseA(const uint16_t value) const
 {
     //if transistor A is open, use his value, else use value from B
     if (mHBridge.getCurrentTransistorState((uint16_t)0) == false) { //if A is closed use value from B
-        MeasurementValueBuffer[mDescription][(mMeasureCounter++) % MAX_NUMBER_OF_MEASUREMENTS] = value * (2);
+        MeasurementValueBuffer[mDescription][(++mMeasureCounter) % MAX_NUMBER_OF_MEASUREMENTS] = value * (2);
     }
 
     //calc and notify about new values only everty 10th time
-    if (mMeasureCounter%10 == 0){
-        updateCurrentValue();
+    if (mMeasureCounter%100 == 0){
+        //updateCurrentValue();
     }
     //TraceLight("A: %d \n",value);
 }
@@ -171,10 +177,10 @@ void PhaseCurrentSensorImproved::interpretPhaseB(const uint16_t value) const
 {
     //only use value from transistor B if A is closed
     if (mHBridge.getCurrentTransistorState((uint16_t)0) == true) { //if A is closed use value from B
-        MeasurementValueBuffer[mDescription][(mMeasureCounter++) % MAX_NUMBER_OF_MEASUREMENTS] = value * (2);
+        MeasurementValueBuffer[mDescription][(++mMeasureCounter) % MAX_NUMBER_OF_MEASUREMENTS] = value * (2);
     }
 
-    /*if (mMeasureCounter%10 == 0){
+    /*if (mMeasureCounter%100 == 0){
         updateCurrentValue();
     }
     */
