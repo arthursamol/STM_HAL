@@ -191,7 +191,7 @@ void HalfBridge::initialize(void) const
 
 bool HalfBridge::getCurrentTransistorState(uint16_t phase) const
 {
-    if (phase == 0)     // A AN  B BN  C CN
+    if (phase == 1)     // A AN  B BN  C CN
     {
         return currentTransistorStates[0]==1 ? true : false;
     }

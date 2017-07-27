@@ -76,7 +76,7 @@ void PhaseCurrentSensorImproved::setNumberOfMeasurementsForPhaseCurrentValue(uin
     if (value == 0) {
         value = 1;
     }
-    mNumberOfMeasurementsForPhaseCurrentValue = value;
+    mNumberOfMeasurementsForPhaseCurrentValue = MAX_NUMBER_OF_MEASUREMENTS;
     //mAdc1.stopConversion();
     //mAdc1.startConversion(
     //                                MeasurementValueBuffer[mDescription].data(), mNumberOfMeasurementsForPhaseCurrentValue,
@@ -97,26 +97,25 @@ void PhaseCurrentSensorImproved::updateCurrentValue(void) const
         mPhaseCurrentValue -= mPhaseCurrentValue / FILTERWIDTH;
         //use mNumberOfMeasurementsForPhaseCurrentValue many values back from mMeasureCounter, remember its a ringbuffer
         mPhaseCurrentValue +=
-            static_cast<float>(array[((mMeasureCounter - i) + MAX_NUMBER_OF_MEASUREMENTS) %
-                                     MAX_NUMBER_OF_MEASUREMENTS]) / FILTERWIDTH;
+            static_cast<float>(array[i]) / FILTERWIDTH;
     }
-/*
-    //only inform about new value after 10 measurements
+
+    //only inform about new value after 1000 measurements
     if (mValueAvailableSemaphore) {
         mValueAvailableSemaphore->giveFromISR();
-        TraceLight("Current: %5.5f \n", mPhaseCurrentValue);
+        //TraceLight("Current: %d \n", static_cast<int32_t>((mOffsetValue-mPhaseCurrentValue) * (1.0 / 52.8))*2000);
     }
-*/
+
 }
 
 void PhaseCurrentSensorImproved::registerValueAvailableSemaphore(os::Semaphore* valueAvailable) const
 {
-    //mValueAvailableSemaphore = valueAvailable;
+    mValueAvailableSemaphore = valueAvailable;
 }
 
 void PhaseCurrentSensorImproved::unregisterValueAvailableSemaphore(void) const
 {
-    //mValueAvailableSemaphore = nullptr;
+    mValueAvailableSemaphore = nullptr;
 }
 
 void PhaseCurrentSensorImproved::enable(void) const
@@ -146,7 +145,7 @@ void PhaseCurrentSensorImproved::calibrate(void) const
 
 float PhaseCurrentSensorImproved::getPhaseCurrent(void) const
 {
-    static constexpr const float A_PER_DIGITS = 1.0 / 53.8;
+    static constexpr const float A_PER_DIGITS = 1.0 / 52.8;
 
     return static_cast<float>(mOffsetValue - mPhaseCurrentValue) *
            A_PER_DIGITS;
@@ -162,29 +161,38 @@ float PhaseCurrentSensorImproved::getCurrentVoltage(void) const
 void PhaseCurrentSensorImproved::interpretPhaseA(const uint16_t value) const
 {
     //if transistor A is open, use his value, else use value from B
-    if (mHBridge.getCurrentTransistorState((uint16_t)0) == false) { //if A is closed use value from B
-        MeasurementValueBuffer[mDescription][(++mMeasureCounter) % MAX_NUMBER_OF_MEASUREMENTS] = value * (2);
+    if (mHBridge.getCurrentTransistorState((uint16_t)1) == false) { //if A is closed use value from B
+        MeasurementValueBuffer[mDescription][mMeasureCounter++] = value;
+        mMeasureCounter = (mMeasureCounter) % MAX_NUMBER_OF_MEASUREMENTS;
+            if (mMeasureCounter  == 0){
+                updateCurrentValue();
+            }
+
+        TraceLight("A: %d \n",value);
     }
 
     //calc and notify about new values only everty 10th time
-    if (mMeasureCounter%100 == 0){
-        //updateCurrentValue();
-    }
-    //TraceLight("A: %d \n",value);
+
+
 }
 
 void PhaseCurrentSensorImproved::interpretPhaseB(const uint16_t value) const
 {
     //only use value from transistor B if A is closed
-    if (mHBridge.getCurrentTransistorState((uint16_t)0) == true) { //if A is closed use value from B
-        MeasurementValueBuffer[mDescription][(++mMeasureCounter) % MAX_NUMBER_OF_MEASUREMENTS] = value * (2);
+    if (mHBridge.getCurrentTransistorState((uint16_t)1) == true) { //if A is closed use value from B
+        MeasurementValueBuffer[mDescription][mMeasureCounter++] = value;
+        mMeasureCounter = (mMeasureCounter) % MAX_NUMBER_OF_MEASUREMENTS;
+            if (mMeasureCounter  == 0){
+                updateCurrentValue();
+            }
+        TraceLight("        B: %d \n",value);
     }
 
-    /*if (mMeasureCounter%100 == 0){
+
+    /*if (mMeasureCounter%1000 == 0){
         updateCurrentValue();
     }
-    */
-    //TraceLight("        B: %d \n",value);
+  	*/
 }
 
 void PhaseCurrentSensorImproved::initialize(void) const
@@ -210,6 +218,7 @@ void PhaseCurrentSensorImproved::initialize(void) const
     mAdc2.registerInterruptCallback([&](uint16_t value){
         this->interpretPhaseB(value);
     });
+    mNumberOfMeasurementsForPhaseCurrentValue = MAX_NUMBER_OF_MEASUREMENTS;
 }
 
 constexpr const std::array<const PhaseCurrentSensorImproved,
