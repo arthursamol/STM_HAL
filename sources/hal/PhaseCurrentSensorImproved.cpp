@@ -168,7 +168,7 @@ void PhaseCurrentSensorImproved::interpretPhaseA(const uint16_t value) const
                 updateCurrentValue();
             }
 
-        TraceLight("A: %d \n",value);
+        TraceLight("A;%d\n",value);
     }
 
     //calc and notify about new values only everty 10th time
@@ -185,7 +185,7 @@ void PhaseCurrentSensorImproved::interpretPhaseB(const uint16_t value) const
             if (mMeasureCounter  == 0){
                 updateCurrentValue();
             }
-        TraceLight("        B: %d \n",value);
+        //TraceLight("B;%d \n",value);
     }
 
 
